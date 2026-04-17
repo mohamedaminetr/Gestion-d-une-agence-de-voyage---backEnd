@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
 require("dotenv").config({ path: "./config/dotenv.env" });
 
 const app = express();
@@ -8,6 +9,7 @@ const app = express();
 // --- Middleware ---
 app.use(cors()); // Allows your Angular app to talk to this API
 app.use(express.json()); // Allows the server to read JSON in request bodies
+app.use(express.urlencoded({ extended: true }));
 
 // --- MongoDB Connection ---
 // Replace the URL with your local or Atlas connection string
@@ -18,13 +20,31 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ Connection error:", err));
 
-// --- Basic Route ---
+// --- Import routes ---
+const destinationRoutes = require("./routes/destinations");
+const voyageRoutes = require("./routes/voyages");
+const errorHandler = require("./middleware/errorHandler");
+
+// --- API Routes ---
 app.get("/", (req, res) => {
-  res.send("Voyage API is running...");
+  res.json({
+    message: "Voyage API is running...",
+    endpoints: {
+      destinations: "/api/destinations",
+      voyages: "/api/voyages",
+    },
+  });
 });
 
+// Mount routes
+app.use("/api/destinations", destinationRoutes);
+app.use("/api/voyages", voyageRoutes);
+
+// Error handler middleware (must be last)
+app.use(errorHandler);
+
 // --- Server Startup ---
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server listening on port ${PORT}`);
 });
