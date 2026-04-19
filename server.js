@@ -8,8 +8,9 @@ const app = express();
 
 // --- Middleware ---
 app.use(cors()); // Allows your Angular app to talk to this API
-app.use(express.json()); // Allows the server to read JSON in request bodies
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' })); // Increased for Base64 images
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- MongoDB Connection ---
 // Replace the URL with your local or Atlas connection string
